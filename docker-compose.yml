@@ -1,0 +1,40 @@
+services:
+  app:
+    image: nazmulhasn/skating_backend:latest
+    container_name: skating_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://car-doctor:car-doctor@cluster0.pyj8wdj.mongodb.net/test?retryWrites=true&w=majority
+      - REDIS_HOST=skating_backend_redis
+      - REDIS_PORT=6379
+    ports:
+      - "5000:5000"
+      - "5005:5005"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: skating_backend_redis
+    restart: always
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  redis-data:
+
+  # mongo:
+  #   image: mongo:7.0
+  #   container_name: skating_backend_mongo
+  #   ports:
+  #     - 27017:27017
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   restart: always
+
+# volumes:
+#   redis-data:
+  # mongo-data:

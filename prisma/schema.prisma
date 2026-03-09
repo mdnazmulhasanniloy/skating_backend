@@ -1,0 +1,447 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+} 
+
+
+//contents
+model Contents {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  termsAndCondition String
+  privacyPolicy     String 
+  refundPolicy      String
+  shippingPolicy    String
+  aboutUs           String
+  location          String
+  copyRight         String
+  footerText        String  
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+ @@map("contents")
+} 
+
+// user Primary model
+model User {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  password    String
+  status      status   @default(active)
+  role        Role     @default(user)
+  profile     String?
+  phoneNumber String?
+  customerId String?
+  howDidYouHearAboutSkatrium String?
+  location   Json?
+  expireAt DateTime?
+  isDeleted   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  verification     Verification? 
+  userInfo     UserInfo? 
+  merchantInfo     MerchantInfo? 
+  organizerInfo     OrganizerInfo? 
+  deviceHistory    DeviceHistory[]  
+  notifications    Notification[]   
+  reviews    Review[]  
+  bookings Booking[]
+  report Report[]
+  products Products[]
+  socialMediaLink SocialMediaLink[]
+  Subscriptions Subscriptions[]
+  events Event[]
+  followers  Followers[] @relation("Following")
+  following  Followers[] @relation("Follower")
+  skatingInterest skatingInterest[]
+   
+}
+
+
+model UserInfo {
+  userId    String   @map("_id") @db.ObjectId
+  skillLevel        SkillLevel @default(beginner)
+  yearsSkating  YearsSkating @default(ZERO_TO_FIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  @@id([userId])
+}
+
+model OrganizerInfo {
+  userId    String   @map("_id") @db.ObjectId
+  haveYouOrganizedSkatingEventsBefore String 
+  whatTypeOfEventsAreYouPlanningToList String 
+  estimatedNumberOfAttendeesAtYourTypicalEvents String 
+  linkToPreviousEventsOrSocialMedia String
+  doYouHavePublicLiabilityInsuranceForYorEvents String 
+  doYouHaveACodeOfConductOrSafetyPolicyForYourEvents String 
+  link String?
+
+  user User @relation(fields: [userId], references: [id])
+  @@id([userId])
+}
+
+model SocialMediaLink {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  platform String
+  link String
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model MerchantInfo {
+ userId    String   @map("_id") @db.ObjectId
+ shopName String
+ shopType ShopType @default(physicalOnly)
+ shopLink String?
+
+
+  user User @relation(fields: [userId], references: [id])
+  @@id([userId])
+}
+
+
+model Followers {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  followerId String @db.ObjectId
+  followingId String @db.ObjectId
+  createdAt DateTime @default(now())
+
+  follower User @relation("Follower", fields: [followerId], references: [id])
+  following User @relation("Following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model DeviceHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  ip        String?
+  browser   String?
+  os        String?
+  device    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Verification { 
+  userId    String   @map("_id") @db.ObjectId
+  otp       Int
+  expiredAt DateTime?
+  status    Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId])
+}
+
+model Notification {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  receiverId String? @db.ObjectId 
+  bookingId String? @db.ObjectId 
+  message String
+  description String?
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User?     @relation(fields: [receiverId], references: [id]) 
+  booking    Booking?     @relation(fields: [bookingId], references: [id]) 
+}
+
+model skatingInterest {
+id String @id @default(auto()) @map("_id") @db.ObjectId
+userId String @db.ObjectId
+title String
+
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+user User @relation(fields: [userId], references: [id])
+}
+
+//events 
+model Event {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  banner String
+  description String?
+  date DateTime
+  location   Json?
+  price Float
+  organizerId String @db.ObjectId
+  priceType  PriceType @default(free)
+  visibility EventVisibility @default(highlight)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+organizer User @relation(fields: [organizerId], references: [id])
+
+  images Images[]
+  Review Review[]
+  bookings Booking[]
+  report Report[]
+}
+
+
+model Images {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String @db.ObjectId
+  url String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+  event Event @relation(fields: [eventId], references: [id])
+}
+
+
+model Review {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  userId String? @db.ObjectId
+  eventId String? @db.ObjectId
+  productId String? @db.ObjectId
+  review String
+  rating Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+  event Event? @relation(fields: [eventId], references: [id])
+  product Products? @relation(fields: [productId], references: [id])
+
+  report Report[]
+
+}
+
+model Booking {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  bookingNo String @unique
+  userId String @db.ObjectId
+  eventId String @db.ObjectId
+  totalPerson Int @default(1)
+  totalAmount Float?
+  status BookingStatus @default(pending)
+  isPaid Boolean @default(false)
+  tranId String?
+  attendees Boolean? 
+  attendeesAt DateTime?  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  user User @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  notification Notification[]
+
+@@index([userId])
+@@index([eventId])
+}
+
+/*
+* @todo 
+need to add event profile product relation
+*/
+model Report {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  eventId String? @db.ObjectId
+  userId String? @db.ObjectId
+  productId String? @db.ObjectId
+  reviewId String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+  event Event? @relation(fields: [eventId], references: [id])
+  review Review? @relation(fields: [reviewId], references: [id])
+  product Products? @relation(fields: [productId], references: [id])
+}
+
+
+//Subscription systems
+model Package {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  subTitle String 
+  descriptions String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  slots Slot[]
+  subscriptions Subscriptions[]
+}
+
+model Slot {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  packageId String @db.ObjectId
+  price Float
+  days Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  package Package @relation(fields: [packageId], references: [id])
+}
+
+model Subscriptions {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  packageId String @db.ObjectId
+  totalPrice Int 
+  endAt DateTime
+  isActive Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  user User @relation(fields: [userId], references: [id])
+  package Package @relation(fields: [packageId], references: [id])
+}
+
+model Categories {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String 
+  image String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Products[]
+}
+model Products {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId String @db.ObjectId
+  authorId String @db.ObjectId
+  name String 
+  description String
+  price Float
+  priceType String 
+  material String
+  discount Float
+  shippingCost Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category Categories @relation(fields: [categoryId], references: [id])
+  author User @relation(fields: [authorId], references: [id])
+  color Color[]
+  size Size[]
+  reviews Review[]
+  report Report[]
+  productImages ProductImages[]
+
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+model Color {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  productId String @db.ObjectId
+  title String  
+
+  product Products @relation(fields: [productId], references: [id])
+}
+model Size {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  productId String @db.ObjectId
+  title String  
+   product Products @relation(fields: [productId], references: [id])
+}
+
+model ProductImages {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  productId String @db.ObjectId
+  url String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+  product Products @relation(fields: [productId], references: [id])
+}
+
+model Orders {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  productId  String @db.ObjectId
+  colorId  String? @db.ObjectId
+  sizeId  String? @db.ObjectId
+  quantity Int @default(1)
+  totalPrice Float
+  location String
+  
+}
+
+
+// Enums 
+enum status {
+  active
+  blocked
+}
+ 
+enum Role {
+  admin
+  sub_admin
+  supper_admin
+  user
+  organizer
+  merchant
+  dj
+}
+
+enum SkillLevel {
+  beginner
+  intermediate
+  advanced
+}
+enum BookingStatus {
+  pending
+  confirmed
+  done
+  canceled 
+}
+
+enum EventVisibility {
+highlight
+pin
+featurePlacement
+}
+enum YearsSkating {
+  ZERO_TO_FIVE   @map("0-5")
+  SIX_TO_TEN     @map("6-10")
+  ELEVEN_TO_FIFTEEN @map("11-15")
+  SIXTEEN_TO_TWENTY @map("16-20")
+  TWENTY_PLUS    @map("20+")
+}
+
+enum PriceType {
+  free
+  paid
+}
+
+enum ShopType {
+  physicalOnly
+  virtualOnly
+}
