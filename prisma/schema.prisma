@@ -148,7 +148,7 @@ model Verification {
   userId    String   @map("_id") @db.ObjectId
   otp       Int
   expiredAt DateTime?
-  status    Boolean  @default(false)
+  status    Boolean  @default(false) 
 
   user User @relation(fields: [userId], references: [id])
 
