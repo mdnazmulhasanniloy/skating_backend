@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { createInterface } from 'readline';
 
-
 const capitalizeFirstLetter = (text: string) => {
   const [first = '', ...rest] = text;
   return [first.toUpperCase(), ...rest].join('');
@@ -12,7 +11,7 @@ const capitalizeFirstLetter = (text: string) => {
 // ⭐ NEW FUNCTION: Auto Update app/routes/index.ts
 // -------------------------------------------------------------
 function updateMainRouteFile(folderName: string) {
-  const routeFilePath = path.join('src', 'app', 'routes', 'index.ts');
+  const routeFilePath = path.join('src', 'app', 'routes', 'routes.ts');
 
   let content = fs.readFileSync(routeFilePath, 'utf8');
 
@@ -22,7 +21,7 @@ function updateMainRouteFile(folderName: string) {
   if (!content.includes(importLine)) {
     content = content.replace(
       /const router = Router\(\);/,
-      `${importLine}\n\nconst router = Router();`, 
+      `${importLine}\n\nconst router = Router();`,
     );
   }
 

@@ -9,5 +9,13 @@
   "editor.formatOnPaste": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "cSpell.words": ["Alrady", "refference", "updatetion"],
-  "prisma.pinToPrisma6": true
+  "prisma.pinToPrisma6": true,
+  "background.enabled": true,
+  "background.useDefault": false,
+  "background.customImages": [],
+  "background.style": {
+    "backdrop-filter": "blur(25px) saturate(180%)",
+    "background-color": "rgba(20, 25, 35, 0.55)",
+    "-webkit-backdrop-filter": "blur(25px) saturate(180%)"
+  }
 }

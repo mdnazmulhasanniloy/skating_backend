@@ -7,6 +7,29 @@ import pickQuery from '@app/utils/pickQuery.js';
 import { paginationHelper } from '@app/helpers/pagination.helpers.js';
 import type { Prisma, Role } from '../../../../generated/prisma/index.js';
 
+interface IUpdate {
+  name?: string;
+  email?: string;
+  userInfo?: Partial<{
+    skillLevel: string;
+    yearsSkating: string;
+  }>;
+  merchantInfo?: Partial<{
+    shopName: string;
+    shopType: string;
+    shopLink?: string;
+  }>;
+  organizerInfo?: Partial<{
+    haveYouOrganizedSkatingEventsBefore: string;
+    whatTypeOfEventsAreYouPlanningToList: string;
+    estimatedNumberOfAttendeesAtYourTypicalEvents: string;
+    linkToPreviousEventsOrSocialMedia: string;
+    doYouHavePublicLiabilityInsuranceForYorEvents: string;
+    doYouHaveACodeOfConductOrSafetyPolicyForYourEvents: string;
+    link?: string;
+  }>;
+}
+
 const create = async (payload: Prisma.UserCreateInput) => {
   try {
     const isExist = await prisma.user.findFirst({
@@ -133,6 +156,10 @@ const getAll = async (query: Record<string, any>) => {
         },
       },
       deviceHistory: true,
+
+      userInfo: true,
+      merchantInfo: true,
+      organizerInfo: true,
     },
   });
 
@@ -169,21 +196,63 @@ const getById = async (id: string) => {
       deviceHistory: true,
       // address: true,
     },
+    include: {
+      userInfo: true,
+      merchantInfo: true,
+      organizerInfo: true,
+    },
   });
 
   return result;
 };
 
-const update = async (id: string, payload: Prisma.UserUpdateInput) => {
+const update = async (id: string, payload: any) => {
   try {
+    const { userInfo, merchantInfo, organizerInfo, ...data } = payload;
+
     const result = await prisma.user.update({
       where: { id },
-      data: payload,
+      data: {
+        ...data,
+
+        ...(userInfo && {
+          userInfo: {
+            upsert: {
+              update: {
+                ...userInfo, // এখানে শুধু UserInfo এর fields
+              },
+              create: {
+                ...userInfo, // এখানেও শুধু UserInfo এর fields
+              },
+            },
+          },
+        }),
+
+        ...(merchantInfo && {
+          merchantInfo: {
+            upsert: {
+              update: { ...merchantInfo }, // MerchantInfo fields
+              create: { ...merchantInfo },
+            },
+          },
+        }),
+
+        ...(organizerInfo && {
+          organizerInfo: {
+            upsert: {
+              update: { ...organizerInfo }, // OrganizerInfo fields
+              create: { ...organizerInfo },
+            },
+          },
+        }),
+      },
       include: {
-        verification: true,
-        deviceHistory: true,
+        userInfo: true,
+        merchantInfo: true,
+        organizerInfo: true,
       },
     });
+
     return result;
   } catch (error: any) {
     throw new AppError(

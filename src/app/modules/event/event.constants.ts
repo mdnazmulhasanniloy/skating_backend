@@ -1,1 +1,0 @@
-export const EVENT_FILTER_FIELDS = []
