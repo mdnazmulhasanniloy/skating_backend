@@ -7,29 +7,7 @@ import pickQuery from '@app/utils/pickQuery.js';
 import { paginationHelper } from '@app/helpers/pagination.helpers.js';
 import type { Prisma, Role } from '../../../../generated/prisma/index.js';
 
-interface IUpdate {
-  name?: string;
-  email?: string;
-  userInfo?: Partial<{
-    skillLevel: string;
-    yearsSkating: string;
-  }>;
-  merchantInfo?: Partial<{
-    shopName: string;
-    shopType: string;
-    shopLink?: string;
-  }>;
-  organizerInfo?: Partial<{
-    haveYouOrganizedSkatingEventsBefore: string;
-    whatTypeOfEventsAreYouPlanningToList: string;
-    estimatedNumberOfAttendeesAtYourTypicalEvents: string;
-    linkToPreviousEventsOrSocialMedia: string;
-    doYouHavePublicLiabilityInsuranceForYorEvents: string;
-    doYouHaveACodeOfConductOrSafetyPolicyForYourEvents: string;
-    link?: string;
-  }>;
-}
-
+ 
 const create = async (payload: Prisma.UserCreateInput) => {
   try {
     const isExist = await prisma.user.findFirst({
@@ -272,6 +250,8 @@ const deleteUser = async (id: string) => {
 
   return result;
 };
+
+
 export const userService = {
   create,
   update,

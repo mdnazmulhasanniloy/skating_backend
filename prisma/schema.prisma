@@ -117,7 +117,7 @@ model MerchantInfo {
   user User @relation(fields: [userId], references: [id])
   @@id([userId])
 }
-
+ 
 
 model Followers {
   id String @id @default(auto()) @map("_id") @db.ObjectId

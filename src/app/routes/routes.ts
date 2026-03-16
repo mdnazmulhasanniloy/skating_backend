@@ -9,7 +9,15 @@ import { notificationRoutes } from '@app/module/notification/notification.route.
 
 const router: Router = Router();
 
-const moduleRoutes = [ 
+const moduleRoutes = [
+  {
+    path: "/followers",
+    route: followersRoutes,
+  },
+  {
+    path: "/follow",
+    route: followRoutes,
+  }, 
   {
     path: '/notifications',
     route: notificationRoutes,
